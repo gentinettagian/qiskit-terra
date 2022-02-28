@@ -143,7 +143,7 @@ class SPSA(Optimizer):
         lse_solver: Optional[Callable[[np.ndarray, np.ndarray], np.ndarray]] = None,
         initial_hessian: Optional[np.ndarray] = None,
         callback: Optional[CALLBACK] = None,
-        termination_checker: Optional[TERMINATIONCHECKER] = None,
+        termination_checker: Optional[TERMINATIONCHECKER] = None
     ) -> None:
         r"""
         Args:
@@ -686,10 +686,11 @@ def constant(eta=0.01):
 
 def _batch_evaluate(function, points, max_evals_grouped):
     # if the function cannot handle lists of points as input, cover this case immediately
+    seed = algorithm_globals.random.integers(100000)
     if max_evals_grouped == 1:
         # support functions with multiple arguments where the points are given in a tuple
         return [
-            function(*point) if isinstance(point, tuple) else function(point) for point in points
+            function(*point, seed) if isinstance(point, tuple) else function(point, seed) for point in points
         ]
 
     num_points = len(points)
@@ -704,7 +705,7 @@ def _batch_evaluate(function, points, max_evals_grouped):
 
     results = []
     for batch in batched_points:
-        results += function(batch).tolist()
+        results += function(batch, seed).tolist()
 
     return results
 
